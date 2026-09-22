@@ -15,8 +15,11 @@ https://github.com/mrc-ide/wodin-shortcourse-2026.
 - `apps/ladder` - adds the infection-history "ladder" (partial immunity via
   rung-dependent recovery/infectiousness) and irreversible disease
   progression (TS, TT), no age structure. Ported from `teaching_app_ladder`.
-  `n_rungs` sizes the S/I arrays via odin's user-sized-array feature -
-  compiles and runs correctly with plain `odin` locally, but whether
-  WODIN's UI handles an array-sizing parameter is unconfirmed.
+  **Confirmed WODIN does not support odin's array syntax** (`S[i]`,
+  `dim(S) <- n`) - an array-based version compiled/ran fine with plain
+  `odin` locally but was rejected by WODIN's own code validator. Rewritten
+  as fully unrolled scalar equations, fixed at 5 rungs (`S_1`..`S_5`,
+  `I_1`..`I_5`) - changing the rung count means hand-editing/regenerating
+  the file rather than adjusting a parameter.
  
 

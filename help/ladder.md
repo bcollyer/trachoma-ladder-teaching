@@ -67,20 +67,23 @@ $$
 | `beta` | transmission intensity |
 | `nu0`, `nu1`, `nuExponent` | recovery-rate-by-rung parameters |
 | `lExponent` | infectiousness-decay-by-rung parameter |
-| `n_rungs` | number of infection-history rungs (**fixed when the model starts** - see note below) |
+| (rung count) | fixed at **5** rungs in this app - see note below |
 | `r_TS`, `r_TT` | scarring / trichiasis accumulation rates |
 | `alpha` | trichiasis resolution rate (e.g. surgery) |
 | `life_expectancy` | sets $\mu = 1/\text{life expectancy}$ |
 
-### A note on `n_rungs`
+### A note on the fixed rung count
 
-Unlike the other parameters, `n_rungs` sizes the `S`/`I` arrays, so it is
-fixed when the model is constructed rather than adjustable via a live
-slider - changing it means re-initialising the model. This is the one part
-of this app whose behaviour in WODIN specifically (as opposed to `odin`
-itself, where it works and has been tested) is unconfirmed - please flag
-any issues with array-sized parameters to the WODIN team.
+This model is written with $n=5$ rungs unrolled into plain named
+variables (`S_1`..`S_5`, `I_1`..`I_5`) rather than as an odin array
+(`S[i]`, `dim(S) <- n_rungs`). An array version was tried first and
+compiled and ran correctly with the plain `odin` R package, but **WODIN
+itself does not support odin's array syntax** - it rejected the array
+version with a code validation error before ever reaching the model
+compiler. Changing the number of rungs therefore means hand-editing (or
+regenerating) this file with a different number of `S_j`/`I_j` pairs,
+rather than adjusting a parameter.
 
 See `trachoma_first_principles_300_history.R` and `teaching_app_ladder` in
 the main modelling repository for the fuller model and an interactive
-Shiny version with MDA support.
+Shiny version with MDA support and an adjustable rung count.
