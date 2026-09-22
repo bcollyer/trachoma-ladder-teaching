@@ -19,8 +19,15 @@
 # lExponent), rather than a separate susceptibility reduction. Recovery
 # from the top rung (5) loops back to S_5 (capped).
 #
-# Like sis.R, this omits MDA - WODIN's "basic" app type has no UI for
-# scheduling discrete treatment events.
+# MDA is a CONTINUOUS approximation, not scheduled discrete events (WODIN's
+# "basic" app type has no UI for those): an annual pulse clearing fraction
+# p = mda_coverage*mda_efficacy once every mda_interval years clears the
+# same total fraction per year as a continuous rate
+# tau = -log(1-p)/mda_interval, applied I_j -> S_j at the SAME rung (MDA
+# cures don't build partial immunity, unlike natural recovery).
+
+mda_p <- min(mda_coverage * mda_efficacy, 0.995)
+mda_rate <- -log(1 - mda_p) / mda_interval
 
 # Rung-dependent recovery rate and relative infectiousness - the rung
 # index (j-1) is baked in per-equation as a literal number.
@@ -51,21 +58,21 @@ recovery_3 <- I_3 * nu_3
 recovery_4 <- I_4 * nu_4
 recovery_5 <- I_5 * nu_5
 
-deriv(S_1) <- mu * N - incidence_1 - mu * S_1
-deriv(I_1) <- incidence_1 - recovery_1 - mu * I_1
+deriv(S_1) <- mu * N - incidence_1 - mu * S_1 + mda_rate * I_1
+deriv(I_1) <- incidence_1 - recovery_1 - mu * I_1 - mda_rate * I_1
 
-deriv(S_2) <- recovery_1 - incidence_2 - mu * S_2
-deriv(I_2) <- incidence_2 - recovery_2 - mu * I_2
+deriv(S_2) <- recovery_1 - incidence_2 - mu * S_2 + mda_rate * I_2
+deriv(I_2) <- incidence_2 - recovery_2 - mu * I_2 - mda_rate * I_2
 
-deriv(S_3) <- recovery_2 - incidence_3 - mu * S_3
-deriv(I_3) <- incidence_3 - recovery_3 - mu * I_3
+deriv(S_3) <- recovery_2 - incidence_3 - mu * S_3 + mda_rate * I_3
+deriv(I_3) <- incidence_3 - recovery_3 - mu * I_3 - mda_rate * I_3
 
-deriv(S_4) <- recovery_3 - incidence_4 - mu * S_4
-deriv(I_4) <- incidence_4 - recovery_4 - mu * I_4
+deriv(S_4) <- recovery_3 - incidence_4 - mu * S_4 + mda_rate * I_4
+deriv(I_4) <- incidence_4 - recovery_4 - mu * I_4 - mda_rate * I_4
 
 # Top rung is capped: recovery from I_5 loops back to S_5, not a rung 6.
-deriv(S_5) <- recovery_4 + recovery_5 - incidence_5 - mu * S_5
-deriv(I_5) <- incidence_5 - recovery_5 - mu * I_5
+deriv(S_5) <- recovery_4 + recovery_5 - incidence_5 - mu * S_5 + mda_rate * I_5
+deriv(I_5) <- incidence_5 - recovery_5 - mu * I_5 - mda_rate * I_5
 
 # Scarring (TS) and trichiasis (TT), driven by repeat infection (rungs >= 2).
 repeat_I <- I_2 + I_3 + I_4 + I_5
@@ -99,6 +106,9 @@ life_expectancy <- user(55)
 mu <- 1 / life_expectancy
 N <- user(1000)
 I0_prop <- user(0.05)
+mda_coverage <- user(0)
+mda_efficacy <- user(1)
+mda_interval <- user(1)
 
 output(prevalence_infection) <- (I_1 + I_2 + I_3 + I_4 + I_5) / N
 output(prevalence_TT) <- TT / N

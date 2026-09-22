@@ -11,7 +11,7 @@ https://github.com/mrc-ide/wodin-shortcourse-2026.
 ## Apps
 
 - `apps/sis` - simple 2-compartment (S, I) SIS model, no age structure, no
-  partial immunity, no MDA. Ported from the `teaching_app` Shiny prototype
+  partial immunity. Ported from the `teaching_app` Shiny prototype
 - `apps/ladder` - adds the infection-history "ladder" (partial immunity via
   rung-dependent recovery/infectiousness) and irreversible disease
   progression (TS, TT), no age structure. Ported from `teaching_app_ladder`.
@@ -21,5 +21,12 @@ https://github.com/mrc-ide/wodin-shortcourse-2026.
   as fully unrolled scalar equations, fixed at 5 rungs (`S_1`..`S_5`,
   `I_1`..`I_5`) - changing the rung count means hand-editing/regenerating
   the file rather than adjusting a parameter.
+
+Both apps include MDA as a **continuous approximation** (a constant cure
+rate equivalent to the average effect of periodic pulse dosing -
+`tau = -log(1 - coverage*efficacy) / interval`), since WODIN's "basic" app
+type has no UI for scheduling discrete treatment events. This reproduces
+the right average suppression of transmission but not the sharp
+annual drop-then-rebound shape of a real MDA round.
  
 

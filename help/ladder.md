@@ -18,6 +18,9 @@ controls.
 Getting infected moves you $S_j \to I_j$ (same rung). Recovering from
 $I_j$ moves you **up** to $S_{j+1}$ - except recovery from the **top**
 rung $I_n$, which loops back to $S_n$ (there is nowhere higher to go).
+MDA instead cures $I_j \to S_j$ at the **same** rung (see below) - unlike
+natural recovery, a chemically-shortened infection doesn't build partial
+immunity.
 
 ### Diagram
 
@@ -41,19 +44,19 @@ $$
 $$
 
 $$
-\frac{dS_1}{dt} = \mu N - \lambda S_1 - \mu S_1
+\frac{dS_1}{dt} = \mu N - \lambda S_1 - \mu S_1 + \tau I_1
 \qquad
-\frac{dI_1}{dt} = \lambda S_1 - (\nu_1 + \mu) I_1
+\frac{dI_1}{dt} = \lambda S_1 - (\nu_1 + \mu) I_1 - \tau I_1
 $$
 
 $$
-\frac{dS_j}{dt} = \nu_{j-1} I_{j-1} - \lambda S_j - \mu S_j \quad (1 < j < n)
+\frac{dS_j}{dt} = \nu_{j-1} I_{j-1} - \lambda S_j - \mu S_j + \tau I_j \quad (1 < j < n)
 \qquad
-\frac{dI_j}{dt} = \lambda S_j - (\nu_j + \mu) I_j \quad (1 < j \le n)
+\frac{dI_j}{dt} = \lambda S_j - (\nu_j + \mu) I_j - \tau I_j \quad (1 < j \le n)
 $$
 
 $$
-\frac{dS_n}{dt} = \nu_{n-1} I_{n-1} + \nu_n I_n - \lambda S_n - \mu S_n
+\frac{dS_n}{dt} = \nu_{n-1} I_{n-1} + \nu_n I_n - \lambda S_n - \mu S_n + \tau I_n
 $$
 
 $$
@@ -71,6 +74,25 @@ $$
 | `r_TS`, `r_TT` | scarring / trichiasis accumulation rates |
 | `alpha` | trichiasis resolution rate (e.g. surgery) |
 | `life_expectancy` | sets $\mu = 1/\text{life expectancy}$ |
+| `mda_coverage`, `mda_efficacy`, `mda_interval` | MDA parameters (continuous approximation - see below) |
+
+### Mass Drug Administration (continuous approximation)
+
+As with `apps/sis`, WODIN's "basic" app type has no UI for scheduling
+discrete treatment events at exact times, so MDA is instead approximated
+as a **constant continuous cure rate** $\tau$, chosen so that over one
+`mda_interval` it clears the same total fraction of each infected rung as
+a single instantaneous round with coverage $c$ and efficacy $e$ would:
+
+$$
+\tau = \frac{-\ln(1 - p)}{\text{mda\_interval}}, \qquad p = \min(c \times e,\ 0.995)
+$$
+
+This applies uniformly to every rung ($I_j \to S_j$, same rung, for all
+$j$), matching the "same rung" MDA rule above. Set `mda_coverage` to 0 to
+turn MDA off. As with the basic SIS app, this reproduces the right
+**average** suppression but not the sharp annual drop-then-rebound shape
+of a real MDA round.
 
 ### A note on the fixed rung count
 
