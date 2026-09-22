@@ -1,0 +1,8 @@
+{
+    "appType": "basic",
+    "title": "Trachoma: SIS ladder model (partial immunity)",
+    "endTime": 100,
+    "help": {
+        "tabName": "About the model"
+    }
+}
