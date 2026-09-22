@@ -1,0 +1,9 @@
+{
+    "courseTitle": "Trachoma Teaching Models",
+    "savePrefix": "trachoma",
+    "port": 3000,
+    "appsPath": "apps",
+    "baseUrl": "https://epimodels.dide.ic.ac.uk/trachoma",
+    "odinApi": "http://odin.api:8001",
+    "redisUrl": "redis://redis:6379"
+}

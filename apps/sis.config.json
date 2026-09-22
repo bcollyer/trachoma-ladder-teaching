@@ -1,0 +1,8 @@
+{
+    "appType": "basic",
+    "title": "Trachoma: simple SIS model",
+    "endTime": 20,
+    "help": {
+        "tabName": "About the model"
+    }
+}
