@@ -22,11 +22,13 @@ https://github.com/mrc-ide/wodin-shortcourse-2026.
   `I_1`..`I_5`) - changing the rung count means hand-editing/regenerating
   the file rather than adjusting a parameter.
 
-Both apps include MDA as a **continuous approximation** (a constant cure
-rate equivalent to the average effect of periodic pulse dosing -
-`tau = -log(1 - coverage*efficacy) / interval`), since WODIN's "basic" app
-type has no UI for scheduling discrete treatment events. This reproduces
-the right average suppression of transmission but not the sharp
-annual drop-then-rebound shape of a real MDA round.
+Both apps include MDA as a **periodic pulse approximation** - a narrow,
+repeating Gaussian bump in the cure rate built directly from odin's `t`
+(current simulation time), centred at every multiple of `mda_interval`,
+with total dose per round calibrated to clear the same fraction as an
+instantaneous round with the given `mda_coverage`/`mda_efficacy` would.
+This reproduces the characteristic sawtooth (sharp drop at each round,
+rebound in between), since WODIN's "basic" app type has no UI for
+scheduling true discrete treatment events.
  
 

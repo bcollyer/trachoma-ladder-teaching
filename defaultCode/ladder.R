@@ -20,14 +20,22 @@
 # from the top rung (5) loops back to S_5 (capped).
 #
 # MDA is a CONTINUOUS approximation, not scheduled discrete events (WODIN's
-# "basic" app type has no UI for those): an annual pulse clearing fraction
-# p = mda_coverage*mda_efficacy once every mda_interval years clears the
-# same total fraction per year as a continuous rate
-# tau = -log(1-p)/mda_interval, applied I_j -> S_j at the SAME rung (MDA
-# cures don't build partial immunity, unlike natural recovery).
+# "basic" app type has no UI for those): rather than a flat rate, this
+# reproduces the annual sawtooth by building a narrow, repeating Gaussian
+# pulse directly in t (odin exposes the integration time as `t`). Each
+# cycle (period = mda_interval) gets one pulse, centred at each multiple
+# of mda_interval, with total "dose" over the cycle calibrated to clear
+# the same fraction p = mda_coverage*mda_efficacy as an instantaneous
+# round would. Applied I_j -> S_j at the SAME rung (MDA cures don't build
+# partial immunity, unlike natural recovery).
 
 mda_p <- min(mda_coverage * mda_efficacy, 0.995)
-mda_rate <- -log(1 - mda_p) / mda_interval
+mda_target <- -log(1 - mda_p)              # total hazard to deliver per cycle
+mda_sigma <- max(mda_pulse_width, 0.001) * mda_interval  # pulse width (time units)
+mda_cycle_frac <- t / mda_interval - floor(t / mda_interval)
+mda_dist <- min(mda_cycle_frac, 1 - mda_cycle_frac) * mda_interval  # time to nearest pulse centre, wrapped
+mda_shape <- exp(-(mda_dist * mda_dist) / (2 * mda_sigma * mda_sigma))
+mda_rate <- mda_target / (mda_sigma * sqrt(2 * 3.14159265358979)) * mda_shape
 
 # Rung-dependent recovery rate and relative infectiousness - the rung
 # index (j-1) is baked in per-equation as a literal number.
@@ -109,6 +117,7 @@ I0_prop <- user(0.05)
 mda_coverage <- user(0)
 mda_efficacy <- user(1)
 mda_interval <- user(1)
+mda_pulse_width <- user(0.05)
 
 output(prevalence_infection) <- (I_1 + I_2 + I_3 + I_4 + I_5) / N
 output(prevalence_TT) <- TT / N

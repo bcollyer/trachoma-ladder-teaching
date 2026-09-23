@@ -34,11 +34,11 @@ back to **S** through natural clearance ($\gamma$) or MDA (see below).
 ### Equations
 
 \begin{align}
-\frac{dS}{dt} &= -\beta \frac{I}{N} S + \gamma I + \tau I \\[6pt]
-\frac{dI}{dt} &= \beta \frac{I}{N} S - \gamma I - \tau I
+\frac{dS}{dt} &= -\beta \frac{I}{N} S + \gamma I + \tau(t) I \\[6pt]
+\frac{dI}{dt} &= \beta \frac{I}{N} S - \gamma I - \tau(t) I
 \end{align}
 
-where $\tau$ is the MDA cure rate defined below.
+where $\tau(t)$ is the (time-varying) MDA cure rate defined below.
 
 | Symbol | Meaning | Units |
 |---|---|---|
@@ -48,25 +48,35 @@ where $\tau$ is the MDA cure rate defined below.
 | mda_coverage | fraction of infections cleared per MDA round | dimensionless (0-1) |
 | mda_efficacy | drug efficacy per round | dimensionless (0-1) |
 | mda_interval | years between MDA rounds | years |
+| mda_pulse_width | sharpness of each round, as a fraction of `mda_interval` | dimensionless (small, e.g. 0.03) |
 | $R_0 = \beta/\gamma$ | basic reproduction number | dimensionless |
 
-### Mass Drug Administration (continuous approximation)
+### Mass Drug Administration (periodic pulse approximation)
 
 WODIN's "basic" app type has no UI for scheduling discrete treatment
-events at exact times, so MDA is instead approximated as a **constant
-continuous cure rate** $\tau$ chosen so that, over one `mda_interval`, it
-clears the same total fraction of infections as a single instantaneous
-round with coverage $c$ and efficacy $e$ would:
+events at exact times, but `odin` does expose the current simulation time
+as `t`, so MDA rounds are reproduced as a **narrow, repeating pulse built
+directly into the equations** rather than a flat background rate. Each
+round is a Gaussian-shaped bump in the cure rate, centred at every
+multiple of `mda_interval`, with total "dose" over the round calibrated
+so the same fraction of infections is cleared as a single instantaneous
+round with coverage $c$ and efficacy $e$ would clear:
 
 $$
-\tau = \frac{-\ln(1 - p)}{\text{mda\_interval}}, \qquad p = \min(c \times e,\ 0.995)
+p = \min(c \times e,\ 0.995), \qquad \sigma = \text{mda\_pulse\_width} \times \text{mda\_interval}
 $$
 
-(the cap at $p=0.995$ just keeps $\tau$ finite if coverage and efficacy are
-both set to 100%). This reproduces the right **average** suppression of
-transmission, but - unlike a real MDA round - it doesn't show the sharp
-annual drop-then-rebound pattern; the prevalence trace instead settles
-smoothly onto a lower suppressed equilibrium.
+$$
+\tau(t) = \frac{-\ln(1-p)}{\sigma\sqrt{2\pi}} \, \exp\!\left(-\frac{d(t)^2}{2\sigma^2}\right)
+$$
+
+where $d(t)$ is the (wrapped) time to the nearest round. This produces
+the characteristic **sawtooth**: a sharp drop in prevalence at each round,
+followed by a rebound towards the underlying endemic level as new
+infections accumulate before the next round. Smaller `mda_pulse_width`
+gives a sharper, more "instantaneous-looking" drop; too small a value can
+make the pulse hard for the solver to resolve smoothly, so this is capped
+at a reasonable minimum internally.
 
 ### Equilibrium prevalence
 

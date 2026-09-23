@@ -44,19 +44,19 @@ $$
 $$
 
 $$
-\frac{dS_1}{dt} = \mu N - \lambda S_1 - \mu S_1 + \tau I_1
+\frac{dS_1}{dt} = \mu N - \lambda S_1 - \mu S_1 + \tau(t) I_1
 \qquad
-\frac{dI_1}{dt} = \lambda S_1 - (\nu_1 + \mu) I_1 - \tau I_1
+\frac{dI_1}{dt} = \lambda S_1 - (\nu_1 + \mu) I_1 - \tau(t) I_1
 $$
 
 $$
-\frac{dS_j}{dt} = \nu_{j-1} I_{j-1} - \lambda S_j - \mu S_j + \tau I_j \quad (1 < j < n)
+\frac{dS_j}{dt} = \nu_{j-1} I_{j-1} - \lambda S_j - \mu S_j + \tau(t) I_j \quad (1 < j < n)
 \qquad
-\frac{dI_j}{dt} = \lambda S_j - (\nu_j + \mu) I_j - \tau I_j \quad (1 < j \le n)
+\frac{dI_j}{dt} = \lambda S_j - (\nu_j + \mu) I_j - \tau(t) I_j \quad (1 < j \le n)
 $$
 
 $$
-\frac{dS_n}{dt} = \nu_{n-1} I_{n-1} + \nu_n I_n - \lambda S_n - \mu S_n + \tau I_n
+\frac{dS_n}{dt} = \nu_{n-1} I_{n-1} + \nu_n I_n - \lambda S_n - \mu S_n + \tau(t) I_n
 $$
 
 $$
@@ -74,25 +74,34 @@ $$
 | `r_TS`, `r_TT` | scarring / trichiasis accumulation rates |
 | `alpha` | trichiasis resolution rate (e.g. surgery) |
 | `life_expectancy` | sets $\mu = 1/\text{life expectancy}$ |
-| `mda_coverage`, `mda_efficacy`, `mda_interval` | MDA parameters (continuous approximation - see below) |
+| `mda_coverage`, `mda_efficacy`, `mda_interval`, `mda_pulse_width` | MDA parameters (periodic pulse - see below) |
 
-### Mass Drug Administration (continuous approximation)
+### Mass Drug Administration (periodic pulse approximation)
 
 As with `apps/sis`, WODIN's "basic" app type has no UI for scheduling
-discrete treatment events at exact times, so MDA is instead approximated
-as a **constant continuous cure rate** $\tau$, chosen so that over one
-`mda_interval` it clears the same total fraction of each infected rung as
-a single instantaneous round with coverage $c$ and efficacy $e$ would:
+discrete treatment events at exact times, but `odin` does expose the
+current simulation time as `t`, so MDA rounds are reproduced as a
+**narrow, repeating pulse built directly into the equations** - a
+Gaussian-shaped bump in the cure rate, centred at every multiple of
+`mda_interval`, with total "dose" calibrated so the same fraction of
+infections is cleared as a single instantaneous round with coverage $c$
+and efficacy $e$ would clear:
 
 $$
-\tau = \frac{-\ln(1 - p)}{\text{mda\_interval}}, \qquad p = \min(c \times e,\ 0.995)
+p = \min(c \times e,\ 0.995), \qquad \sigma = \text{mda\_pulse\_width} \times \text{mda\_interval}
 $$
 
-This applies uniformly to every rung ($I_j \to S_j$, same rung, for all
-$j$), matching the "same rung" MDA rule above. Set `mda_coverage` to 0 to
-turn MDA off. As with the basic SIS app, this reproduces the right
-**average** suppression but not the sharp annual drop-then-rebound shape
-of a real MDA round.
+$$
+\tau(t) = \frac{-\ln(1-p)}{\sigma\sqrt{2\pi}} \, \exp\!\left(-\frac{d(t)^2}{2\sigma^2}\right)
+$$
+
+where $d(t)$ is the (wrapped) time to the nearest round. This applies
+uniformly to every rung ($I_j \to S_j$, same rung, for all $j$), matching
+the "same rung" MDA rule above, and produces the characteristic
+**sawtooth**: a sharp drop in prevalence at each round, followed by a
+rebound before the next one. Set `mda_coverage` to 0 to turn MDA off.
+Smaller `mda_pulse_width` gives a sharper drop; too small a value can be
+harder for the solver to resolve smoothly.
 
 ### A note on the fixed rung count
 
