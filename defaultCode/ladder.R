@@ -22,17 +22,22 @@
 # MDA is a CONTINUOUS approximation, not scheduled discrete events (WODIN's
 # "basic" app type has no UI for those): rather than a flat rate, this
 # reproduces the annual sawtooth by building a narrow, repeating Gaussian
-# pulse directly in t (odin exposes the integration time as `t`). Each
-# cycle (period = mda_interval) gets one pulse, centred at each multiple
-# of mda_interval, with total "dose" over the cycle calibrated to clear
-# the same fraction p = mda_coverage*mda_efficacy as an instantaneous
-# round would. Applied I_j -> S_j at the SAME rung (MDA cures don't build
-# partial immunity, unlike natural recovery).
+# pulse in time. odin doesn't expose the integration time by default, so
+# we track it ourselves with a `time` state variable (deriv(time) <- 1,
+# initial(time) <- 0). Each cycle (period = mda_interval) gets one pulse,
+# centred at each multiple of mda_interval, with total dose over the
+# cycle calibrated to clear the same fraction p =
+# mda_coverage*mda_efficacy as an instantaneous round would. Applied
+# I_j -> S_j at the SAME rung (MDA cures don't build partial immunity,
+# unlike natural recovery).
+
+deriv(time) <- 1
+initial(time) <- 0
 
 mda_p <- min(mda_coverage * mda_efficacy, 0.995)
 mda_target <- -log(1 - mda_p)              # total hazard to deliver per cycle
 mda_sigma <- max(mda_pulse_width, 0.001) * mda_interval  # pulse width (time units)
-mda_cycle_frac <- t / mda_interval - floor(t / mda_interval)
+mda_cycle_frac <- time / mda_interval - floor(time / mda_interval)
 mda_dist <- min(mda_cycle_frac, 1 - mda_cycle_frac) * mda_interval  # time to nearest pulse centre, wrapped
 mda_shape <- exp(-(mda_dist * mda_dist) / (2 * mda_sigma * mda_sigma))
 mda_rate <- mda_target / (mda_sigma * sqrt(2 * 3.14159265358979)) * mda_shape

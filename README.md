@@ -23,12 +23,14 @@ https://github.com/mrc-ide/wodin-shortcourse-2026.
   the file rather than adjusting a parameter.
 
 Both apps include MDA as a **periodic pulse approximation** - a narrow,
-repeating Gaussian bump in the cure rate built directly from odin's `t`
-(current simulation time), centred at every multiple of `mda_interval`,
-with total dose per round calibrated to clear the same fraction as an
-instantaneous round with the given `mda_coverage`/`mda_efficacy` would.
-This reproduces the characteristic sawtooth (sharp drop at each round,
-rebound in between), since WODIN's "basic" app type has no UI for
-scheduling true discrete treatment events.
+repeating Gaussian bump in the cure rate built from an explicit `time`
+state variable (`deriv(time) <- 1`, `initial(time) <- 0` - odin doesn't
+expose the integration time by default, confirmed by the WODIN team),
+centred at every multiple of `mda_interval`, with total dose per round
+calibrated to clear the same fraction as an instantaneous round with the
+given `mda_coverage`/`mda_efficacy` would. This reproduces the
+characteristic sawtooth (sharp drop at each round, rebound in between),
+since WODIN's "basic" app type has no UI for scheduling true discrete
+treatment events.
  
 
