@@ -32,5 +32,11 @@ given `mda_coverage`/`mda_efficacy` would. This reproduces the
 characteristic sawtooth (sharp drop at each round, rebound in between),
 since WODIN's "basic" app type has no UI for scheduling true discrete
 treatment events.
+
+`defaultCode/*.R` are teaching exercises with `YOUR CODE HERE` blanks in
+place of the core model equations. The fully worked versions live in
+`files/*_solution.R` and are linked as downloads from `index.html` (per
+WODIN's convention that `files/` holds anything referenced from the
+landing page).
  
 

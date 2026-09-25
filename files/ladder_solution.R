@@ -4,8 +4,7 @@
 # lExponent). Recovery from the top rung (5) loops back to S_5 (capped).
 
 # Model parameters
-
-beta <- user(4.5)                  # transmission rate
+beta <- user(4.5)                # transmission rate
 nu0 <- user(0.885594)            # minimum recovery rate
 nu1 <- user(4.208717)            # maximum recovery rate
 nuExponent <- user(0.751195)     # exponential increase in recovery rate
