@@ -31,9 +31,9 @@ mda_target / (mda_sigma * sqrt(2 * 3.14159265358979)) * mda_shape
 
 
 # SIS model derivatives
-deriv(S) <- YOUR CODE HERE +
+deriv(S) <- -beta * S * I / N + gamma * I +
          mda_rate * I                       
-deriv(I) <-  YOUR CODE HERE  -
+deriv(I) <-  beta * S * I / N - gamma * I -
          mda_rate * I
 
 # Initials state

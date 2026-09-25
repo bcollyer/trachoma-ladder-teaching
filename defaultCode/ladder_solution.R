@@ -4,7 +4,8 @@
 # lExponent). Recovery from the top rung (5) loops back to S_5 (capped).
 
 # Model parameters
-beta <- user(4.5)                # transmission rate
+
+beta <- user(4.5)                  # transmission rate
 nu0 <- user(0.885594)            # minimum recovery rate
 nu1 <- user(4.208717)            # maximum recovery rate
 nuExponent <- user(0.751195)     # exponential increase in recovery rate
@@ -36,21 +37,22 @@ mda_rate <- if (time < mda_start) 0 else
 mda_target / (mda_sigma * sqrt(2 * 3.14159265358979)) * mda_shape
 
 # Level-dependent recovery rate
-nu_1 <- YOUR CODE HERE
-nu_2 <- YOUR CODE HERE
-nu_3 <- YOUR CODE HERE
-nu_4 <- YOUR CODE HERE
-nu_5 <- YOUR CODE HERE
+nu_1 <- nu0
+nu_2 <- (nu0 - nu1) * exp(-nuExponent * 1) + nu1
+nu_3 <- (nu0 - nu1) * exp(-nuExponent * 2) + nu1
+nu_4 <- (nu0 - nu1) * exp(-nuExponent * 3) + nu1
+nu_5 <- (nu0 - nu1) * exp(-nuExponent * 4) + nu1
 
 # Level-dependent infectiousness rate
-lload_1 <- YOUR CODE HERE
-lload_2 <- YOUR CODE HERE
-lload_3 <- YOUR CODE HERE
-lload_4 <- YOUR CODE HERE
-lload_5 <- YOUR CODE HERE
+lload_1 <- 1
+lload_2 <- exp(-lExponent * 1)
+lload_3 <- exp(-lExponent * 2)
+lload_4 <- exp(-lExponent * 3)
+lload_5 <- exp(-lExponent * 4)
 
 # Force of infection
-lambda <- YOUR CODE HERE
+lambda <- beta * (lload_1 * I_1 + lload_2 * I_2 + lload_3 * I_3 +
+                     lload_4 * I_4 + lload_5 * I_5) / N
 
 # Incidence
 incidence_1 <- S_1 * lambda
